@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>职业匹配测试</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .intro-box h3 {
+            color: #1a1a1a;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .intro-box ul {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+            list-position: inside;
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: #999;
+            font-size: 12px;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .test-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-number {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .question.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .question h2 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            cursor: pointer;
+        }
+
+        .option input[type="radio"] {
+            display: none;
+        }
+
+        .option label {
+            display: block;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+        }
+
+        .option label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-prev {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .result-type {
+            font-size: 72px;
+            color: #667eea;
+            font-weight: 700;
+            margin: 30px 0;
+        }
+
+        .result-title {
+            font-size: 28px;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .result-desc {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .result-traits {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .result-traits h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .traits-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .trait-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            border-left: 3px solid #667eea;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .result-actions button {
+            flex: 1;
+            padding: 14px 24px;
+        }
+
+        .btn-again {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-again:hover {
+            background: #f8f9ff;
+        }
+
+        .btn-home {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .test-content {
+                padding: 20px;
+            }
+
+            .question h2 {
+                font-size: 20px;
+            }
+
+            .result-type {
+                font-size: 48px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .result-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-briefcase"></i> 职业匹配测试</h1>
+            <p>根据你的性格特质和兴趣，发现最适合的职业方向</p>
+        </div>
+
+        <div class="test-content">
+            <div id="intro">
+                <div class="intro-box">
+                    <h3>📌 测试说明</h3>
+                    <ul>
+                        <li><strong>20个问题</strong> - 评估你的职业能力和特质</li>
+                        <li><strong>6大职业类型</strong> - 基于Holland职业理论</li>
+                        <li><strong>准确匹配</strong> - 发现��适合你的职业方向</li>
+                        <li><strong>发展路径</strong> - 获得职业建议和发展建议</li>
+                    </ul>
+                </div>
+                <button onclick="startTest()" style="width: 100%; padding: 14px 24px; border: none; border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer; font-size: 16px;">
+                    开始测试
+                </button>
+            </div>
+
+            <div id="testForm" style="display: none;">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text"><span id="currentQuestion">1</span> / 20</div>
+                </div>
+
+                <div id="questionsContainer"></div>
+
+                <div class="buttons">
+                    <button class="btn-prev" id="btnPrev" onclick="prevQuestion()" disabled>← 上一题</button>
+                    <button class="btn-next" id="btnNext" onclick="nextQuestion()">下一题 →</button>
+                </div>
+            </div>
+
+            <div id="resultContainer" class="result-container">
+                <div class="result-type" id="careerType"></div>
+                <h2 class="result-title" id="careerTitle"></h2>
+                <p class="result-desc" id="careerDesc"></p>
+
+                <div class="result-traits">
+                    <h3>推荐职业方向</h3>
+                    <div class="traits-grid" id="traitsGrid"></div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="btn-again" onclick="resetTest()">重新测试</button>
+                    <button class="btn-home" onclick="window.location.href='index.html'">返回首页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // 现实型(R) - 动手操作、技术、工程
+            { text: "我喜欢处理实际的、具体的事物。", type: "R", weight: 1 },
+            { text: "我对动手操作和修理东西感兴趣。", type: "R", weight: 1 },
+            { text: "我擅长体育、运动或户外活动。", type: "R", weight: 1 },
+            { text: "我喜欢与工具和机械打交道。", type: "R", weight: 1 },
+            
+            // 调查型(I) - 研究、分析、思考
+            { text: "我喜欢探索复杂的理论和概念。", type: "I", weight: 1 },
+            { text: "我享受分析和解决问题的过程。", type: "I", weight: 1 },
+            { text: "我对科学、研究和学术感兴趣。", type: "I", weight: 1 },
+            { text: "我喜欢深入学习新知识。", type: "I", weight: 1 },
+            
+            // 艺术型(A) - 创意、表达、美学
+            { text: "我对艺术、音乐或写作感兴趣。", type: "A", weight: 1 },
+            { text: "我喜欢创意的、需要想象力的工作。", type: "A", weight: 1 },
+            { text: "我对美感和审美有敏锐的感知。", type: "A", weight: 1 },
+            { text: "我喜欢自我表达和创新。", type: "A", weight: 1 },
+            
+            // 社交型(S) - 帮助他人、教育、沟通
+            { text: "我喜欢帮助和教育他人。", type: "S", weight: 1 },
+            { text: "我对社会服务和福利工作感兴趣。", type: "S", weight: 1 },
+            { text: "我善于倾听和同情他人。", type: "S", weight: 1 },
+            { text: "我喜欢建立温暖的人际关系。", type: "S", weight: 1 },
+            
+            // 企业型(E) - 领导、说服、管理
+            { text: "我喜欢领导和组织他人。", type: "E", weight: 1 },
+            { text: "我对商业、销售和营销感兴趣。", type: "E", weight: 1 },
+            { text: "我擅长说服他人和谈判。", type: "E", weight: 1 },
+            { text: "我喜欢掌控和管理事务。", type: "E", weight: 1 }
+        ];
+
+        const careerTypes = {
+            R: {
+                name: "现实型",
+                title: "技术与工程领域专家",
+                desc: "你具有很强的动手能力和实践精神。你适合从事需要动手操作、技术应用的工作，能够有效解决实际问题。建议探索工程、建筑、维修、农业等领域。",
+                careers: [
+                    "✓ 工程师（机械、电气、土木等）",
+                    "✓ 建筑师/建筑工人",
+                    "✓ 技术维修师",
+                    "✓ 农业专家",
+                    "✓ 机械操作员"
+                ]
+            },
+            I: {
+                name: "调查型",
+                title: "科研与分析领域专家",
+                desc: "你具有强烈的求知欲和分析能力。你适合从事需要深入思考、研究分析的工作。建议探索科研、医学、数学、计算机等领域。",
+                careers: [
+                    "✓ 研究员/科学家",
+                    "✓ 医生/医学研究员",
+                    "✓ 数据分析师",
+                    "✓ 程序员/软件工程师",
+                    "✓ 教授/学者"
+                ]
+            },
+            A: {
+                name: "艺术型",
+                title: "创意与表达领域专家",
+                desc: "你拥有丰富的创意和想象力。你适合从事需要创意表达和美学设计的工作。��议探索艺术、设计、写作、音乐等领域。",
+                careers: [
+                    "✓ 艺术家/设计师",
+                    "✓ 作家/编剧",
+                    "✓ 音乐家/音乐制作人",
+                    "✓ 平面/UI设计师",
+                    "✓ 创意总监"
+                ]
+            },
+            S: {
+                name: "社交型",
+                title: "教育与服务领域专家",
+                desc: "你具有高度的同理心和服务精神。你适合从事需要人际互动和帮助他人的工作。建议探索教育、咨询、护理、社会工作等领域。",
+                careers: [
+                    "✓ 教师/教育工作者",
+                    "✓ 心理咨询师",
+                    "✓ 护士/医护人员",
+                    "✓ 社会工作者",
+                    "✓ 人力资源专业人士"
+                ]
+            },
+            E: {
+                name: "企业型",
+                title: "商业与管理领域专家",
+                desc: "你具有领导力和说服能力。你适合从事需要管理、销售、协调的工作。建议探索商业、市场营销、销售、管理等领域。",
+                careers: [
+                    "✓ 企业管理者/经理",
+                    "✓ 销售经理/销售代表",
+                    "✓ 市场营销专家",
+                    "✓ 商业顾问",
+                    "✓ 企业家"
+                ]
+            }
+        };
+
+        let currentQuestion = 0;
+        let scores = { R: 0, I: 0, A: 0, S: 0, E: 0 };
+
+        function initTest() {
+            const container = document.getElementById("questionsContainer");
+            container.innerHTML = "";
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.className = "question";
+                if (index === 0) questionDiv.classList.add("active");
+                
+                questionDiv.innerHTML = `
+                    <div class="question-number">第 ${index + 1} 题</div>
+                    <h2>${q.text}</h2>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q${index}1" name="q${index}" value="1" data-index="${index}">
+                            <label for="q${index}1">完全不符合</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}2" name="q${index}" value="2" data-index="${index}">
+                            <label for="q${index}2">基本不符合</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}3" name="q${index}" value="3" data-index="${index}">
+                            <label for="q${index}3">中立</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}4" name="q${index}" value="4" data-index="${index}">
+                            <label for="q${index}4">基本符合</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}5" name="q${index}" value="5" data-index="${index}">
+                            <label for="q${index}5">完全符合</label>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function startTest() {
+            document.getElementById("intro").style.display = "none";
+            document.getElementById("testForm").style.display = "block";
+            initTest();
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById("progressFill").style.width = progress + "%";
+            document.getElementById("currentQuestion").textContent = currentQuestion + 1;
+            
+            document.getElementById("btnPrev").disabled = currentQuestion === 0;
+            document.getElementById("btnNext").textContent = currentQuestion === questions.length - 1 ? "查看结果" : "下一题 →";
+        }
+
+        function nextQuestion() {
+            const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+            if (!selected) {
+                alert("请先选择一个答案");
+                return;
+            }
+
+            const value = parseInt(selected.value);
+            scores[questions[currentQuestion].type] += value;
+            
+            if (currentQuestion < questions.length - 1) {
+                document.querySelector(".question.active").classList.remove("active");
+                currentQuestion++;
+                document.querySelectorAll(".question")[currentQuestion].classList.add("active");
+                updateProgress();
+            } else {
+                calculateResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                document.querySelector(".question.active").classList.remove("active");
+                currentQuestion--;
+                document.querySelectorAll(".question")[currentQuestion].classList.add("active");
+                updateProgress();
+            }
+        }
+
+        function calculateResult() {
+            let maxScore = 0;
+            let resultType = "R";
+            const types = ["R", "I", "A", "S", "E"];
+            
+            types.forEach(type => {
+                if (scores[type] > maxScore) {
+                    maxScore = scores[type];
+                    resultType = type;
+                }
+            });
+            
+            showResult(resultType);
+        }
+
+        function showResult(type) {
+            document.getElementById("testForm").style.display = "none";
+            document.getElementById("resultContainer").classList.add("show");
+
+            const info = careerTypes[type];
+            document.getElementById("careerType").textContent = info.name;
+            document.getElementById("careerTitle").textContent = info.title;
+            document.getElementById("careerDesc").textContent = info.desc;
+
+            const careersHtml = info.careers.map(career => 
+                `<div class="trait-item">${career}</div>`
+            ).join("");
+            document.getElementById("traitsGrid").innerHTML = careersHtml;
+        }
+
+        function resetTest() {
+            currentQuestion = 0;
+            scores = { R: 0, I: 0, A: 0, S: 0, E: 0 };
+            
+            document.getElementById("resultContainer").classList.remove("show");
+            document.getElementById("intro").style.display = "block";
+            document.getElementById("testForm").style.display = "none";
+        }
+    </script>
+</body>
+</html>
