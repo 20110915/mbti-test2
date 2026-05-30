@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MBTI 性格测试</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .intro-box h3 {
+            color: #1a1a1a;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .intro-box ul {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+            list-position: inside;
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: #999;
+            font-size: 12px;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .test-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-number {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .question.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .question h2 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            cursor: pointer;
+        }
+
+        .option input[type="radio"] {
+            display: none;
+        }
+
+        .option label {
+            display: block;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+        }
+
+        .option label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-prev {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .result-type {
+            font-size: 72px;
+            color: #667eea;
+            font-weight: 700;
+            margin: 30px 0;
+            letter-spacing: 8px;
+        }
+
+        .result-title {
+            font-size: 28px;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .result-desc {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .result-traits {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .result-traits h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .traits-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .trait-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            border-left: 3px solid #667eea;
+        }
+
+        .score-analysis {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            text-align: left;
+            border: 2px solid #f0f0f0;
+        }
+
+        .score-analysis h4 {
+            color: #667eea;
+            font-size: 14px;
+            margin-bottom: 12px;
+            font-weight: 600;
+        }
+
+        .score-bar-group {
+            margin-bottom: 15px;
+        }
+
+        .score-label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #666;
+            margin-bottom: 6px;
+            font-weight: 500;
+        }
+
+        .score-bar {
+            background: #e0e0e0;
+            border-radius: 6px;
+            height: 8px;
+            overflow: hidden;
+        }
+
+        .score-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .result-actions button {
+            flex: 1;
+            padding: 14px 24px;
+        }
+
+        .btn-again {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-again:hover {
+            background: #f8f9ff;
+        }
+
+        .btn-home {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .test-content {
+                padding: 20px;
+            }
+
+            .question h2 {
+                font-size: 20px;
+            }
+
+            .traits-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .result-type {
+                font-size: 48px;
+                letter-spacing: 4px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .result-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 MBTI 性格测试</h1>
+            <p>通过科学的心理学理论，20 个精选问题，精准分析你的性格类型</p>
+        </div>
+
+        <div class="test-content">
+            <div id="intro">
+                <div class="intro-box">
+                    <h3>📌 测试说明</h3>
+                    <ul>
+                        <li><strong>20个问题</strong> - 全面评估你的性格特质</li>
+                        <li><strong>4个维度</strong> - E/I（外向/内向）、S/N（感觉/直觉）、T/F（思维/情感）、J/P（判断/知觉）</li>
+                        <li><strong>16种类型</strong> - 准确识别你的性格归类</li>
+                        <li><strong>无对错之分</strong> - 每种类型都有独特的优势和价值</li>
+                    </ul>
+                </div>
+                <button onclick="startTest()" style="width: 100%; padding: 14px 24px; border: none; border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 16px; font-weight: 600; cursor: pointer;">
+                    开始测试
+                </button>
+            </div>
+
+            <div id="testForm" style="display: none;">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text"><span id="currentQuestion">1</span> / 20</div>
+                </div>
+
+                <div id="questionsContainer"></div>
+
+                <div class="buttons">
+                    <button class="btn-prev" id="btnPrev" onclick="prevQuestion()" disabled>← 上一题</button>
+                    <button class="btn-next" id="btnNext" onclick="nextQuestion()">下一题 →</button>
+                </div>
+            </div>
+
+            <div id="resultContainer" class="result-container">
+                <div class="result-type" id="mbtiType"></div>
+                <h2 class="result-title" id="mbtiTitle"></h2>
+                <p class="result-desc" id="mbtiDesc"></p>
+
+                <div class="result-traits">
+                    <h3>性格特点</h3>
+                    <div class="traits-grid" id="traitsGrid"></div>
+                </div>
+
+                <div class="score-analysis">
+                    <h4>维度得分分析</h4>
+                    <div id="scoresAnalysis"></div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="btn-again" onclick="resetTest()">重新测试</button>
+                    <button class="btn-home" onclick="window.location.href='index.html'">返回首页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 改进的 MBTI 问卷 - 更加全面和准确
+        const questions = [
+            // E/I 维度 (Extraversion/Introversion)
+            {
+                text: "在社交活动中，你通常：",
+                a: "主动与陌生人交流，精力充沛",
+                b: "与熟人相聚，感到放松",
+                dimension: "EI",
+                pair: "E"
+            },
+            {
+                text: "完成工作后，你倾向于：",
+                a: "立即与同事分享想法和成果",
+                b: "先独处思考，再决定是否分享",
+                dimension: "EI",
+                pair: "E"
+            },
+            // S/N 维度 (Sensing/Intuition)
+            {
+                text: "在学习新知识时，你更喜欢：",
+                a: "实际示范和具体例子",
+                b: "理论解释和概念框架",
+                dimension: "SN",
+                pair: "S"
+            },
+            {
+                text: "计划旅行时，你会：",
+                a: "查询具体的景点、餐厅、交通信息",
+                b: "寻找整体的感受和故事",
+                dimension: "SN",
+                pair: "S"
+            },
+            // T/F 维度 (Thinking/Feeling)
+            {
+                text: "做重要决定时，你更依赖：",
+                a: "逻辑分析和数据事实",
+                b: "个人价值观和他人感受",
+                dimension: "TF",
+                pair: "T"
+            },
+            {
+                text: "处理他人冲突时，你通常：",
+                a: "指出哪一方更有道理",
+                b: "关注双方的感受和关系",
+                dimension: "TF",
+                pair: "T"
+            },
+            // J/P 维度 (Judging/Perceiving)
+            {
+                text: "工作风格上，你倾向于：",
+                a: "提前规划，按步骤进行",
+                b: "灵活应变，根据情况调整",
+                dimension: "JP",
+                pair: "J"
+            },
+            {
+                text: "截止日期临近时，你通常：",
+                a: "早已完成，还留有检查时间",
+                b: "最后冲刺，享受压力下的效率",
+                dimension: "JP",
+                pair: "J"
+            },
+            // E/I 维度追加
+            {
+                text: "周末放松时，你更喜欢：",
+                a: "参加聚会或外出活动",
+                b: "独处或与亲密朋友相聚",
+                dimension: "EI",
+                pair: "E"
+            },
+            // S/N 维度追加
+            {
+                text: "遇到问题时，你先想到的是：",
+                a: "具体怎么解决（现实方案）",
+                b: "为什么会这样（深层原因）",
+                dimension: "SN",
+                pair: "S"
+            },
+            // T/F 维度追加
+            {
+                text: "被批评时，你更在意的是：",
+                a: "批评是否客观和有道理",
+                b: "批评者是否尊重你",
+                dimension: "TF",
+                pair: "T"
+            },
+            // J/P 维度追加
+            {
+                text: "居住环境中，你倾向于：",
+                a: "保持整洁有序",
+                b: "舒适自在更重要",
+                dimension: "JP",
+                pair: "J"
+            },
+            // E/I 第三层
+            {
+                text: "你觉得自己的精力来源于：",
+                a: "与他人互动和外部活动",
+                b: "独处和内部思考",
+                dimension: "EI",
+                pair: "E"
+            },
+            // S/N 第三层
+            {
+                text: "对于可能性和机会，你：",
+                a: "关注现在能实现什么",
+                b: "想象未来可能是什么样",
+                dimension: "SN",
+                pair: "S"
+            },
+            // T/F 第三层
+            {
+                text: "在团队中，你扮演的角色更接近：",
+                a: "理性分析者，指出问题所在",
+                b: "协调者，维护团队和谐",
+                dimension: "TF",
+                pair: "T"
+            },
+            // J/P 第三层
+            {
+                text: "面对变化时，你的反应是：",
+                a: "感到不适，需要重新规划",
+                b: "兴奋，看到新的可能性",
+                dimension: "JP",
+                pair: "J"
+            },
+            // E/I 第四层
+            {
+                text: "在陌生人面前，你通常：",
+                a: "快速适应，主动交流",
+                b: "需要时间观察，然后融入",
+                dimension: "EI",
+                pair: "E"
+            },
+            // S/N 第四层
+            {
+                text: "你更喜欢的工作类型是：",
+                a: "有明确的规则和标准程序",
+                b: "富有创意和创新挑战",
+                dimension: "SN",
+                pair: "S"
+            },
+            // T/F 第四层
+            {
+                text: "在组织中，你更看重的是：",
+                a: "效率和公平的规则",
+                b: "员工满意度和工作环境",
+                dimension: "TF",
+                pair: "T"
+            },
+            // J/P 第四层
+            {
+                text: "对于计划外的安排，你：",
+                a: "需要提前告知我调整时间",
+                b: "通常可以临时安排",
+                dimension: "JP",
+                pair: "J"
+            }
+        ];
+
+        // MBTI 性格描述和特点
+        const descriptions = {
+            INTJ: {
+                title: "建筑师 (INTJ)",
+                desc: "独立、战略思维强、理性决断。具有远大理想和完美主义精神，是天生的策略家和革新者。",
+                traits: ["战略规划", "理性分析", "独立自主", "完美主义", "领导力", "创新思维"]
+            },
+            INTP: {
+                title: "逻辑学家 (INTP)",
+                desc: "好奇心强、喜爱分析、追求真理。深思熟虑，热爱探索理论和解决复杂问题。",
+                traits: ["好奇心强", "逻辑推理", "创新思维", "独立思考", "专注深度", "理论研究"]
+            },
+            ENTJ: {
+                title: "指挥官 (ENTJ)",
+                desc: "天生领导者、果断高效、目标明确。具有强大的组织能力和远见卓识。",
+                traits: ["领导力", "高效执行", "战略眼光", "果断决策", "组织能力", "抗压能力"]
+            },
+            ENTP: {
+                title: "辩论家 (ENTP)",
+                desc: "聪慧敏捷、善于论辩、富有创意。精力充沛，喜欢挑战和新奇事物。",
+                traits: ["快速思维", "辩论能力", "创新精神", "灵活适应", "社交能力", "问题解决"]
+            },
+            INFJ: {
+                title: "提倡者 (INFJ)",
+                desc: "理想主义、富有洞察力、热心助人。具有深刻的同理心和强烈的使命感。",
+                traits: ["同理心", "洞察力", "理想主义", "真诚关怀", "直觉理解", "影响力"]
+            },
+            INFP: {
+                title: "调停者 (INFP)",
+                desc: "富有同情心、创意丰富、价值驱动。热爱艺术和自我表达，追求内心的真实。",
+                traits: ["同情心", "创意表达", "价值观", "真诚温和", "自我反思", "艺术天赋"]
+            },
+            ENFJ: {
+                title: "主人公 (ENFJ)",
+                desc: "天生激励者、热情善良、善于沟通。具有强烈的人际关系能力和团队精神。",
+                traits: ["激励他人", "共情能力", "沟通技能", "团队意识", "热情开朗", "领导风范"]
+            },
+            ENFP: {
+                title: "竞选者 (ENFP)",
+                desc: "热情奔放、想象丰富、多才多艺。充满生活热情，擅长发现和启发他人。",
+                traits: ["热情洋溢", "创意丰富", "社交魅力", "灵感迸发", "多才多艺", "乐观积极"]
+            },
+            ISTJ: {
+                title: "物流师 (ISTJ)",
+                desc: "可靠务实、责任心强、有序高效。是真正的执行者，坚守原则和承诺。",
+                traits: ["责任心", "务实精神", "组织能力", "可靠性", "纪律性", "效率优先"]
+            },
+            ISFJ: {
+                title: "守卫者 (ISFJ)",
+                desc: "温和贴心、尽职尽责、乐于服务。具有强烈的同情心和服务精神。",
+                traits: ["贴心体贴", "责任心", "服务精神", "忠诚度高", "实际行动", "细心周到"]
+            },
+            ESTJ: {
+                title: "总经理 (ESTJ)",
+                desc: "高效能干、条理清晰、果断决策。天生的组织者和管理者，注重结果。",
+                traits: ["高效管理", "决策能力", "组织力", "领导气质", "执行力", "逻辑性"]
+            },
+            ESFJ: {
+                title: "执政官 (ESFJ)",
+                desc: "热心友善、乐于帮助、注重和谐。具有强烈的社交能力和人情味。",
+                traits: ["热心助人", "社交能力", "和谐感", "责任心", "组织力", "忠诚友善"]
+            },
+            ISTP: {
+                title: "鉴赏家 (ISTP)",
+                desc: "实践能力强、冷静分析、追求效率。热爱动手实践和解决实际问题。",
+                traits: ["动手能力", "实践精神", "冷静思考", "问题解决", "独立自主", "适应能力"]
+            },
+            ISFP: {
+                title: "探险家 (ISFP)",
+                desc: "温和谦逊、审美敏感、追求自由。具有艺术气质和对美的敏锐感知。",
+                traits: ["审美能力", "艺术天赋", "温和谦逊", "自由精神", "感受力强", "真诚善良"]
+            },
+            ESTP: {
+                title: "企业家 (ESTP)",
+                desc: "行动力强、充满活力、善于应变。充满冒险精神，是真正的实干家。",
+                traits: ["行动力", "冒险精神", "应变能力", "社交魅力", "乐观进取", "实战高手"]
+            },
+            ESFP: {
+                title: "表演者 (ESFP)",
+                desc: "乐观开朗、社交高手、热爱生活。充满热情和感染力，是生活的享受者。",
+                traits: ["社交能力", "乐观开朗", "表现欲", "感染力强", "热爱生活", "适应能力"]
+            }
+        };
+
+        let currentQuestion = 0;
+        let answers = {};
+        let scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+        function initTest() {
+            const container = document.getElementById("questionsContainer");
+            container.innerHTML = "";
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.className = "question";
+                if (index === 0) questionDiv.classList.add("active");
+                
+                questionDiv.innerHTML = `
+                    <div class="question-number">第 ${index + 1} 题</div>
+                    <h2>${q.text}</h2>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q${index}a" name="q${index}" value="A" data-index="${index}" data-value="A">
+                            <label for="q${index}a">${q.a}</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}b" name="q${index}" value="B" data-index="${index}" data-value="B">
+                            <label for="q${index}b">${q.b}</label>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function startTest() {
+            document.getElementById("intro").style.display = "none";
+            document.getElementById("testForm").style.display = "block";
+            initTest();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById("progressFill").style.width = progress + "%";
+            document.getElementById("currentQuestion").textContent = currentQuestion + 1;
+            
+            document.getElementById("btnPrev").disabled = currentQuestion === 0;
+            document.getElementById("btnNext").textContent = currentQuestion === questions.length - 1 ? "查看结果" : "下一题 →";
+        }
+
+        function nextQuestion() {
+            const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+            if (!selected) {
+                alert("请先选择一个答案");
+                return;
+            }
+
+            answers[currentQuestion] = selected.value;
+            
+            if (currentQuestion < questions.length - 1) {
+                document.querySelector(".question.active").classList.remove("active");
+                currentQuestion++;
+                document.querySelectorAll(".question")[currentQuestion].classList.add("active");
+                updateProgress();
+            } else {
+                calculateResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                document.querySelector(".question.active").classList.remove("active");
+                currentQuestion--;
+                document.querySelectorAll(".question")[currentQuestion].classList.add("active");
+                updateProgress();
+            }
+        }
+
+        function calculateResult() {
+            // 重置分数
+            scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+
+            // 根据答案计算分数
+            questions.forEach((q, index) => {
+                if (answers[index]) {
+                    if (answers[index] === "A") {
+                        scores[q.pair]++;
+                    } else {
+                        // B 选项对应的维度反向
+                        const dimension = q.dimension;
+                        const oppositeType = dimension === "EI" ? (q.pair === "E" ? "I" : "E") :
+                                          dimension === "SN" ? (q.pair === "S" ? "N" : "S") :
+                                          dimension === "TF" ? (q.pair === "T" ? "F" : "T") :
+                                          (q.pair === "J" ? "P" : "J");
+                        scores[oppositeType]++;
+                    }
+                }
+            });
+
+            // 确定 MBTI 类型
+            const mbti = 
+                (scores.E >= scores.I ? "E" : "I") +
+                (scores.S >= scores.N ? "S" : "N") +
+                (scores.T >= scores.F ? "T" : "F") +
+                (scores.J >= scores.P ? "J" : "P");
+
+            showResult(mbti);
+        }
+
+        function showResult(mbti) {
+            document.getElementById("testForm").style.display = "none";
+            document.getElementById("resultContainer").classList.add("show");
+
+            const info = descriptions[mbti];
+            document.getElementById("mbtiType").textContent = mbti;
+            document.getElementById("mbtiTitle").textContent = info.title;
+            document.getElementById("mbtiDesc").textContent = info.desc;
+
+            // 显示特点
+            const traitsHtml = info.traits.map(trait => 
+                `<div class="trait-item">✓ ${trait}</div>`
+            ).join("");
+            document.getElementById("traitsGrid").innerHTML = traitsHtml;
+
+            // 显示维度得分
+            const scoresHtml = `
+                <div class="score-bar-group">
+                    <div class="score-label"><span>外向 (E) ← → 内向 (I)</span><span>${scores.E} : ${scores.I}</span></div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${(scores.E / (scores.E + scores.I)) * 100}%"></div>
+                    </div>
+                </div>
+                <div class="score-bar-group">
+                    <div class="score-label"><span>感觉 (S) ← → 直觉 (N)</span><span>${scores.S} : ${scores.N}</span></div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${(scores.S / (scores.S + scores.N)) * 100}%"></div>
+                    </div>
+                </div>
+                <div class="score-bar-group">
+                    <div class="score-label"><span>思维 (T) ← → 情感 (F)</span><span>${scores.T} : ${scores.F}</span></div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${(scores.T / (scores.T + scores.F)) * 100}%"></div>
+                    </div>
+                </div>
+                <div class="score-bar-group">
+                    <div class="score-label"><span>判断 (J) ← → 知觉 (P)</span><span>${scores.J} : ${scores.P}</span></div>
+                    <div class="score-bar">
+                        <div class="score-fill" style="width: ${(scores.J / (scores.J + scores.P)) * 100}%"></div>
+                    </div>
+                </div>
+            `;
+            document.getElementById("scoresAnalysis").innerHTML = scoresHtml;
+        }
+
+        function resetTest() {
+            currentQuestion = 0;
+            answers = {};
+            scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
+            
+            document.getElementById("resultContainer").classList.remove("show");
+            document.getElementById("intro").style.display = "block";
+            document.getElementById("testForm").style.display = "none";
+        }
+
+        // 初始化
+        updateProgress();
+    </script>
+</body>
+</html>
