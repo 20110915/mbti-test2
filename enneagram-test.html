@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>九型人格测试</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Helvetica Neue", sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: white;
+            border-radius: 16px;
+            padding: 40px 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .intro-box {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .intro-box h3 {
+            color: #1a1a1a;
+            font-size: 16px;
+            margin-bottom: 10px;
+        }
+
+        .intro-box ul {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.8;
+            list-position: inside;
+        }
+
+        .progress-container {
+            margin-bottom: 20px;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            border-radius: 10px;
+            height: 6px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            height: 100%;
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            color: #999;
+            font-size: 12px;
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        .test-content {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+
+        .question-number {
+            color: #999;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .question {
+            margin-bottom: 40px;
+            display: none;
+        }
+
+        .question.active {
+            display: block;
+            animation: fadeIn 0.4s ease-out;
+        }
+
+        .question h2 {
+            font-size: 24px;
+            color: #1a1a1a;
+            margin-bottom: 25px;
+            font-weight: 600;
+            line-height: 1.5;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            cursor: pointer;
+        }
+
+        .option input[type="radio"] {
+            display: none;
+        }
+
+        .option label {
+            display: block;
+            padding: 16px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+            color: #333;
+            font-weight: 500;
+        }
+
+        .option input[type="radio"]:checked + label {
+            border-color: #667eea;
+            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1) 0%, rgba(118, 75, 162, 0.1) 100%);
+            color: #667eea;
+        }
+
+        .option label:hover {
+            border-color: #667eea;
+            background: #f8f9ff;
+        }
+
+        .buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        button {
+            flex: 1;
+            padding: 14px 24px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn-prev {
+            background: #f0f0f0;
+            color: #333;
+        }
+
+        .btn-prev:hover:not(:disabled) {
+            background: #e0e0e0;
+        }
+
+        .btn-next {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-next:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-container {
+            display: none;
+            text-align: center;
+            animation: fadeIn 0.6s ease-out;
+        }
+
+        .result-container.show {
+            display: block;
+        }
+
+        .result-type {
+            font-size: 72px;
+            color: #667eea;
+            font-weight: 700;
+            margin: 30px 0;
+        }
+
+        .result-title {
+            font-size: 28px;
+            color: #1a1a1a;
+            margin-bottom: 15px;
+            font-weight: 700;
+        }
+
+        .result-desc {
+            font-size: 16px;
+            color: #555;
+            line-height: 1.8;
+            margin-bottom: 30px;
+        }
+
+        .result-traits {
+            background: #f8f9ff;
+            padding: 25px;
+            border-radius: 12px;
+            margin: 30px 0;
+            text-align: left;
+        }
+
+        .result-traits h3 {
+            color: #667eea;
+            font-size: 16px;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .traits-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 15px;
+        }
+
+        .trait-item {
+            background: white;
+            padding: 12px;
+            border-radius: 8px;
+            font-size: 14px;
+            color: #333;
+            border-left: 3px solid #667eea;
+        }
+
+        .result-actions {
+            display: flex;
+            gap: 15px;
+            margin-top: 40px;
+        }
+
+        .result-actions button {
+            flex: 1;
+            padding: 14px 24px;
+        }
+
+        .btn-again {
+            background: white;
+            color: #667eea;
+            border: 2px solid #667eea;
+        }
+
+        .btn-again:hover {
+            background: #f8f9ff;
+        }
+
+        .btn-home {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 600px) {
+            .test-content {
+                padding: 20px;
+            }
+
+            .question h2 {
+                font-size: 20px;
+            }
+
+            .result-type {
+                font-size: 48px;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .result-actions {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-palette"></i> 九型人格测试</h1>
+            <p>发现你的本质性格类型，了解深层的动机和行为模式</p>
+        </div>
+
+        <div class="test-content">
+            <div id="intro">
+                <div class="intro-box">
+                    <h3>📌 测试说明</h3>
+                    <ul>
+                        <li><strong>27个问题</strong> - 全面评估你的性格特质</li>
+                        <li><strong>9种类型</strong> - 准确识别你的九型人格类型</li>
+                        <li><strong>深层动机</strong> - 揭示你内心的真实需求和恐惧</li>
+                        <li><strong>实用指导</strong> - 帮助个人成长和人际关系改善</li>
+                    </ul>
+                </div>
+                <button onclick="startTest()" style="width: 100%; padding: 14px 24px; border: none; border-radius: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-weight: 600; cursor: pointer; font-size: 16px;">
+                    开始测试
+                </button>
+            </div>
+
+            <div id="testForm" style="display: none;">
+                <div class="progress-container">
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                    <div class="progress-text"><span id="currentQuestion">1</span> / 27</div>
+                </div>
+
+                <div id="questionsContainer"></div>
+
+                <div class="buttons">
+                    <button class="btn-prev" id="btnPrev" onclick="prevQuestion()" disabled>← 上一题</button>
+                    <button class="btn-next" id="btnNext" onclick="nextQuestion()">下一题 →</button>
+                </div>
+            </div>
+
+            <div id="resultContainer" class="result-container">
+                <div class="result-type" id="typeNumber"></div>
+                <h2 class="result-title" id="typeTitle"></h2>
+                <p class="result-desc" id="typeDesc"></p>
+
+                <div class="result-traits">
+                    <h3>性格特点</h3>
+                    <div class="traits-grid" id="traitsGrid"></div>
+                </div>
+
+                <div class="result-actions">
+                    <button class="btn-again" onclick="resetTest()">重新测试</button>
+                    <button class="btn-home" onclick="window.location.href='index.html'">返回首页</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            // 第一型：完美主义者相关
+            { text: "我经常觉得有责任把事情做得完美。", type: 1, level: 1 },
+            { text: "当我犯错时，我会感到内疚和失望。", type: 1, level: 2 },
+            { text: "我有很强的道德和伦理标准。", type: 1, level: 1 },
+            
+            // 第二型：助人者相关
+            { text: "帮助他人通常比照顾自己更重要。", type: 2, level: 1 },
+            { text: "我常常能察觉到他人的情感需求。", type: 2, level: 2 },
+            { text: "被他人需要和欣赏让我感到满足。", type: 2, level: 1 },
+            
+            // 第三型：成就者相关
+            { text: "我会为了成功而投入大量的时间和精力。", type: 3, level: 1 },
+            { text: "我希望被认可为一个成功的人。", type: 3, level: 2 },
+            { text: "我专注于目标，并迅速调整以实现结果。", type: 3, level: 1 },
+            
+            // 第四型：个性者相关
+            { text: "我经常感到与众不同，被理解的机会很少。", type: 4, level: 1 },
+            { text: "深度的情感和创意表达对我很重要。", type: 4, level: 2 },
+            { text: "我会沉思自己的感受和内心世界。", type: 4, level: 1 },
+            
+            // 第五型：思想家相关
+            { text: "我喜欢深入理解事物的原理和本质。", type: 5, level: 1 },
+            { text: "在做决定前，我需要充分的信息和思考时间。", type: 5, level: 2 },
+            { text: "我经常沉浸在我的思维和思考中。", type: 5, level: 1 },
+            
+            // 第六型：忠诚者相关
+            { text: "我对当前的情况通常有种不安全感。", type: 6, level: 1 },
+            { text: "我会提前考虑可能出现的问题和风险。", type: 6, level: 2 },
+            { text: "我对忠诚的关系和可靠的人有很高的期待。", type: 6, level: 1 },
+            
+            // 第七型：热情者相关
+            { text: "我总是寻找新的体验和有趣的活动。", type: 7, level: 1 },
+            { text: "被限制或无聊会让我感到沮丧。", type: 7, level: 2 },
+            { text: "我能轻松看到事物积极有趣的一面。", type: 7, level: 1 },
+            
+            // 第八型：领导者相关
+            { text: "我喜欢掌握事情的进展和控制局面。", type: 8, level: 1 },
+            { text: "直接面对冲突对我来说并不困难。", type: 8, level: 2 },
+            { text: "我会坚定地为自己的观点和利益辩护。", type: 8, level: 1 },
+            
+            // 第九型：调停者相关
+            { text: "我通常避免冲突，更倾向于寻求和平。", type: 9, level: 1 },
+            { text: "我很容易适应他人的需求和观点。", type: 9, level: 2 },
+            { text: "维持和谐的关系对我很重要。", type: 9, level: 1 }
+        ];
+
+        const typeDescriptions = {
+            1: {
+                title: "第一型 - 完美主义者",
+                desc: "你是一个原则性强、理想主义的人。致力于改进和完善一切，拥有强烈的道德感和责任心。你相信通过努力可以创造一个更美好的世界。",
+                traits: [
+                    "✓ 原则性和纪律性强",
+                    "✓ 有高的道德和伦理标准",
+                    "✓ 追求卓越和完美",
+                    "✓ 责任心强，可靠",
+                    "✓ 愿意为改进而工作"
+                ]
+            },
+            2: {
+                title: "第二型 - 助人者",
+                desc: "你是一个充满同情心、善于倾听的人。你的快乐来自于帮助他人和建立亲密关系。你很敏感于他人的需求，总是准备提供支持。",
+                traits: [
+                    "✓ 充满同情心和慈悲",
+                    "✓ 善于察觉他人的需求",
+                    "✓ 热心帮助他人",
+                    "✓ 建立深厚的人际关系",
+                    "✓ 以他人为中心，富有奉献精神"
+                ]
+            },
+            3: {
+                title: "第三型 - 成就者",
+                desc: "你是一个目标导向、效率高的人。你渴望成功和认可，并能有效地组织自己以实现目标。你具有竞争精神和强大的工作驱力。",
+                traits: [
+                    "✓ 目标导向和有远见",
+                    "✓ 高效率和生产力",
+                    "✓ 渴望成功和认可",
+                    "✓ 适应能力强，灵活",
+                    "✓ 具有竞争精神和动力"
+                ]
+            },
+            4: {
+                title: "第四型 - 个性者",
+                desc: "你是一个富有创意、情感丰富的人。你深刻感受生活，与众不同，追求自我表达和真实。你经常省思内心，寻求生活的深层意义。",
+                traits: [
+                    "✓ 创意丰富和艺术天赋",
+                    "✓ 情感敏感且深刻",
+                    "✓ 追求独特和真实",
+                    "✓ 内省和自我反思",
+                    "✓ 对美和深度有敏锐感知"
+                ]
+            },
+            5: {
+                title: "第五型 - 思想家",
+                desc: "你是一个好奇心强、理性思维的人。你渴望理解世界的本质，倾向于深思和研究。你是一个独立思考者，喜欢通过学习来探索。",
+                traits: [
+                    "✓ 好奇心强和求知欲",
+                    "✓ 理性思维和分析能力",
+                    "✓ 独立思考者",
+                    "✓ 专注于理解本质",
+                    "✓ 沉思深邃且富有洞察"
+                ]
+            },
+            6: {
+                title: "第六型 - 忠诚者",
+                desc: "你是一个忠诚可靠、谨慎周到的人。你重视安全感和信任，善于预见风险。你对承诺很认真，是值得信赖的朋友和伙伴。",
+                traits: [
+                    "✓ 忠诚和可靠",
+                    "✓ 谨慎和预见性",
+                    "✓ 对安全感的关注",
+                    "✓ 有责任心和尽职",
+                    "✓ 在困难中坚定且忠实"
+                ]
+            },
+            7: {
+                title: "第七型 - 热情者",
+                desc: "你是一个乐观开朗、充满热情的人。你热爱生活和新体验，总能看到事物积极的一面。你的热情能感染他人，使生活充满快乐。",
+                traits: [
+                    "✓ 乐观和热情洋溢",
+                    "✓ 热爱新体验和冒险",
+                    "✓ 灵活适应和多才多艺",
+                    "✓ 充满生活热情",
+                    "✓ 能感染他人，带来快乐"
+                ]
+            },
+            8: {
+                title: "第八型 - 领导者",
+                desc: "你是一个强势、果断、有领导力的人。你不畏冲突，勇敢面对挑战。你渴望掌控局面，保护自己和所关心的人。",
+                traits: [
+                    "✓ 强势和果断",
+                    "✓ 领导力和掌控能力",
+                    "✓ 直接和坦诚",
+                    "✓ 保护欲强",
+                    "✓ 能在冲突中保持冷静"
+                ]
+            },
+            9: {
+                title: "第九型 - 调停者",
+                desc: "你是一个温和、善于调停的人。你重视和平与和谐，容易与不同的人相处。你很少与人产生冲突，总是寻求共同点。",
+                traits: [
+                    "✓ 温和和平易近人",
+                    "✓ 善于调停和妥协",
+                    "✓ 包容性强",
+                    "✓ 易于相处，不易起冲突",
+                    "✓ 重视和谐与稳定"
+                ]
+            }
+        };
+
+        let currentQuestion = 0;
+        let scores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
+
+        function initTest() {
+            const container = document.getElementById("questionsContainer");
+            container.innerHTML = "";
+            questions.forEach((q, index) => {
+                const questionDiv = document.createElement("div");
+                questionDiv.className = "question";
+                if (index === 0) questionDiv.classList.add("active");
+                
+                questionDiv.innerHTML = `
+                    <div class="question-number">第 ${index + 1} 题</div>
+                    <h2>${q.text}</h2>
+                    <div class="options">
+                        <div class="option">
+                            <input type="radio" id="q${index}1" name="q${index}" value="1" data-index="${index}">
+                            <label for="q${index}1">完全不同意</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}2" name="q${index}" value="2" data-index="${index}">
+                            <label for="q${index}2">基本不同意</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}3" name="q${index}" value="3" data-index="${index}">
+                            <label for="q${index}3">略有不同意</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}4" name="q${index}" value="4" data-index="${index}">
+                            <label for="q${index}4">中立</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}5" name="q${index}" value="5" data-index="${index}">
+                            <label for="q${index}5">略有同意</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}6" name="q${index}" value="6" data-index="${index}">
+                            <label for="q${index}6">基本同意</label>
+                        </div>
+                        <div class="option">
+                            <input type="radio" id="q${index}7" name="q${index}" value="7" data-index="${index}">
+                            <label for="q${index}7">完全同意</label>
+                        </div>
+                    </div>
+                `;
+                container.appendChild(questionDiv);
+            });
+        }
+
+        function startTest() {
+            document.getElementById("intro").style.display = "none";
+            document.getElementById("testForm").style.display = "block";
+            initTest();
+            updateProgress();
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById("progressFill").style.width = progress + "%";
+            document.getElementById("currentQuestion").textContent = currentQuestion + 1;
+            
+            document.getElementById("btnPrev").disabled = currentQuestion === 0;
+            document.getElementById("btnNext").textContent = currentQuestion === questions.length - 1 ? "查看结果" : "下一题 →";
+        }
+
+        function nextQuestion() {
+            const selected = document.querySelector(`input[name="q${currentQuestion}"]:checked`);
+            if (!selected) {
+                alert("请先选择一个答案");
+                return;
+            }
+
+            const value = parseInt(selected.value);
+            scores[questions[currentQuestion].type] += value;
+            
+            if (currentQuestion < questions.length - 1) {
+                document.querySelector(".question.active").classList.remove("active");
+                currentQuestion++;
+                document.querySelectorAll(".question")[currentQuestion].classList.add("active");
+                updateProgress();
+            } else {
+                calculateResult();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                document.querySelector(".question.active").classList.remove("active");
+                currentQuestion--;
+                document.querySelectorAll(".question")[currentQuestion].classList.add("active");
+                updateProgress();
+            }
+        }
+
+        function calculateResult() {
+            let maxScore = 0;
+            let resultType = 1;
+            for (let type = 1; type <= 9; type++) {
+                if (scores[type] > maxScore) {
+                    maxScore = scores[type];
+                    resultType = type;
+                }
+            }
+            showResult(resultType);
+        }
+
+        function showResult(type) {
+            document.getElementById("testForm").style.display = "none";
+            document.getElementById("resultContainer").classList.add("show");
+
+            const info = typeDescriptions[type];
+            document.getElementById("typeNumber").textContent = type;
+            document.getElementById("typeTitle").textContent = info.title;
+            document.getElementById("typeDesc").textContent = info.desc;
+
+            const traitsHtml = info.traits.map(trait => 
+                `<div class="trait-item">${trait}</div>`
+            ).join("");
+            document.getElementById("traitsGrid").innerHTML = traitsHtml;
+        }
+
+        function resetTest() {
+            currentQuestion = 0;
+            scores = { 1: 0, 2: 0, 3: 0, 4: 0, 5: 0, 6: 0, 7: 0, 8: 0, 9: 0 };
+            
+            document.getElementById("resultContainer").classList.remove("show");
+            document.getElementById("intro").style.display = "block";
+            document.getElementById("testForm").style.display = "none";
+        }
+    </script>
+</body>
+</html>
