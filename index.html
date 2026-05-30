@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MBTI 性格测试</title>
+
+<style>
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Microsoft YaHei",sans-serif;
+}
+
+body{
+    background:#f5f7fa;
+    padding:30px;
+}
+
+.container{
+    max-width:800px;
+    margin:auto;
+    background:white;
+    border-radius:15px;
+    padding:30px;
+    box-shadow:0 5px 20px rgba(0,0,0,.1);
+}
+
+h1{
+    text-align:center;
+    margin-bottom:30px;
+    color:#333;
+}
+
+.question{
+    margin-bottom:25px;
+    padding:15px;
+    background:#fafafa;
+    border-radius:10px;
+}
+
+.question p{
+    margin-bottom:10px;
+    font-weight:bold;
+}
+
+label{
+    display:block;
+    margin:8px 0;
+    cursor:pointer;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    border:none;
+    border-radius:10px;
+    background:#4f46e5;
+    color:white;
+    font-size:18px;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#4338ca;
+}
+
+.result{
+    display:none;
+    margin-top:30px;
+    text-align:center;
+}
+
+.mbti{
+    font-size:48px;
+    color:#4f46e5;
+    margin:15px 0;
+}
+
+.desc{
+    font-size:18px;
+    color:#555;
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h1>MBTI 性格测试</h1>
+
+    <form id="mbtiForm"></form>
+
+    <button onclick="calculateMBTI()">查看结果</button>
+
+    <div class="result" id="result">
+        <h2>你的 MBTI 类型是</h2>
+        <div class="mbti" id="type"></div>
+        <div class="desc" id="desc"></div>
+    </div>
+</div>
+
+<script>
+
+const questions = [
+{
+    text:"参加聚会时，你通常：",
+    a:"主动认识很多人",
+    b:"只和熟悉的人交流",
+    type:"EI"
+},
+{
+    text:"你更喜欢：",
+    a:"团队合作",
+    b:"独立完成",
+    type:"EI"
+},
+{
+    text:"做决定时你更依赖：",
+    a:"事实和逻辑",
+    b:"直觉和灵感",
+    type:"SN"
+},
+{
+    text:"你更关注：",
+    a:"现实细节",
+    b:"未来可能",
+    type:"SN"
+},
+{
+    text:"评价事情时更倾向：",
+    a:"客观分析",
+    b:"考虑感受",
+    type:"TF"
+},
+{
+    text:"你认为重要的是：",
+    a:"公平",
+    b:"和谐",
+    type:"TF"
+},
+{
+    text:"你喜欢：",
+    a:"提前规划",
+    b:"随机应变",
+    type:"JP"
+},
+{
+    text:"旅行时你会：",
+    a:"制定详细计划",
+    b:"走到哪玩到哪",
+    type:"JP"
+},
+{
+    text:"你更容易：",
+    a:"表达想法",
+    b:"保留想法",
+    type:"EI"
+},
+{
+    text:"学习新知识时：",
+    a:"关注实际应用",
+    b:"关注理论概念",
+    type:"SN"
+},
+{
+    text:"争论时你更看重：",
+    a:"谁更合理",
+    b:"谁感受更重要",
+    type:"TF"
+},
+{
+    text:"工作风格：",
+    a:"按计划推进",
+    b:"灵活处理",
+    type:"JP"
+},
+{
+    text:"空闲时你喜欢：",
+    a:"和朋友出去",
+    b:"独处充电",
+    type:"EI"
+},
+{
+    text:"你更喜欢：",
+    a:"具体经验",
+    b:"抽象思考",
+    type:"SN"
+},
+{
+    text:"处理冲突时：",
+    a:"讲道理",
+    b:"讲感受",
+    type:"TF"
+},
+{
+    text:"截止日期临近时：",
+    a:"早已完成",
+    b:"最后冲刺",
+    type:"JP"
+}
+];
+
+const form = document.getElementById("mbtiForm");
+
+questions.forEach((q,index)=>{
+    form.innerHTML += `
+    <div class="question">
+        <p>${index+1}. ${q.text}</p>
+
+        <label>
+            <input type="radio"
+                   name="q${index}"
+                   value="A"
+                   required>
+            ${q.a}
+        </label>
+
+        <label>
+            <input type="radio"
+                   name="q${index}"
+                   value="B">
+            ${q.b}
+        </label>
+    </div>
+    `;
+});
+
+const descriptions = {
+INTJ:"建筑师：独立、理性、战略思维强。",
+INTP:"逻辑学家：好奇心强，善于分析。",
+ENTJ:"指挥官：领导力强，目标明确。",
+ENTP:"辩论家：创新且富有创造力。",
+INFJ:"提倡者：理想主义且富有洞察力。",
+INFP:"调停者：富有同情心和创造力。",
+ENFJ:"主人公：善于激励他人。",
+ENFP:"竞选者：热情、想象力丰富。",
+ISTJ:"物流师：可靠、务实。",
+ISFJ:"守卫者：体贴且负责任。",
+ESTJ:"总经理：高效且有组织。",
+ESFJ:"执政官：乐于帮助他人。",
+ISTP:"鉴赏家：喜欢实践和探索。",
+ISFP:"探险家：温和且富有艺术感。",
+ESTP:"企业家：行动派，充满活力。",
+ESFP:"表演者：乐观、善于社交。"
+};
+
+function calculateMBTI(){
+
+    let score = {
+        E:0,I:0,
+        S:0,N:0,
+        T:0,F:0,
+        J:0,P:0
+    };
+
+    for(let i=0;i<questions.length;i++){
+
+        let selected = document.querySelector(
+            `input[name="q${i}"]:checked`
+        );
+
+        if(!selected){
+            alert("请完成所有题目");
+            return;
+        }
+
+        let pair = questions[i].type;
+
+        if(selected.value==="A"){
+            score[pair[0]]++;
+        }else{
+            score[pair[1]]++;
+        }
+    }
+
+    let mbti = "";
+
+    mbti += score.E >= score.I ? "E":"I";
+    mbti += score.S >= score.N ? "S":"N";
+    mbti += score.T >= score.F ? "T":"F";
+    mbti += score.J >= score.P ? "J":"P";
+
+    document.getElementById("type").innerText = mbti;
+    document.getElementById("desc").innerText =
+        descriptions[mbti];
+
+    document.getElementById("result").style.display="block";
+
+    window.scrollTo({
+        top:document.body.scrollHeight,
+        behavior:"smooth"
+    });
+}
+</script>
+
+</body>
+</html>
